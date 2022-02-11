@@ -24,9 +24,9 @@ using namespace std;
 #define PHOTO
 //#undef PHOTO
 
-constexpr auto n_lat = 30;
-constexpr auto n_part = 3540;
-constexpr auto n_equ = 14160;
+constexpr auto n_lat = 50;
+constexpr auto n_part = 9900;
+constexpr auto n_equ = 39600;
 constexpr auto n_max_vec = 6;
 
 constexpr auto radius = 0.2;	// radius trebuie sa ramana 1, e doar ce e la LS
@@ -72,13 +72,13 @@ double sol[n_equ], sol_old[n_equ];
 double T[n_part];
 double probabilitateHL[n_part], probabilitateLH[n_part], pres[n_part];
 
-constexpr char fis_particule[500] = "E:\\Stoleriu\\C\\special\\3d\\generare\\2021\\Elastic\\30x30_RektHex_L06_LS.dat";  // HS: r=1.1 L=2
+constexpr char fis_particule[500] = "E:\\Stoleriu\\C\\special\\3d\\generare\\2022\\Elastic\\50x50_RektHex_L06_LS.dat"; // HS: r=1.1 L=2
 
-constexpr char fis_solutiiMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2021\\Metal\\30x30_RektHex_Sol_MHL";
-constexpr char fis_volumeMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2021\\Metal\\30x30_RektHex_Sol_MHL.dat";
-constexpr char fis_volumePHOTO[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2021\\Metal\\30x30_RektHex_Sol_PHOTO0.5_TExcit500_Exo10.dat";
+constexpr char fis_solutiiMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_MHL";
+constexpr char fis_volumeMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_MHL.dat";
+constexpr char fis_volumePHOTO[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_PHOTO0.5_TExcit500_Exo00.dat";
 
-char file[200] = "E:\\Stoleriu\\C\\special\\3d\\res\\2021\\Metal\\30x30_RektHex_PHOTOViz";
+char file[200] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_PHOTOViz";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -924,7 +924,8 @@ double Suprafata(bool save)
 {
 	int i;
 	double a, b, c, p;												//laturile triunghiului
-	double x0 = Medium[1785].x, y0 = Medium[1785].y;
+	//double x0 = Medium[1785].x, y0 = Medium[1785].y;	//30x30
+	double x0 = Medium[4875].x, y0 = Medium[4875].y;	//50x50
 	double x1, y1, x2, y2;
 
 	double pante_inainte_ordonare[6 * n_lat - 3];
