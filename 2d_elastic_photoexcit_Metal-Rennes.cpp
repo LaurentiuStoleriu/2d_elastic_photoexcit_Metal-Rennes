@@ -16,7 +16,7 @@ using namespace alglib;
 using namespace std;
 
 #define grafic 1
-#undef grafic
+//#undef grafic
 
 #define MHL 1
 #undef MHL
@@ -72,6 +72,8 @@ double sol[n_equ], sol_old[n_equ];
 double T[n_part];
 double probabilitateHL[n_part], probabilitateLH[n_part], pres[n_part];
 
+double depth = 0.0;
+
 constexpr char fis_particule[500] = "E:\\Stoleriu\\C\\special\\3d\\generare\\2022\\Elastic\\50x50_RektHex_L06_LS.dat"; // HS: r=1.1 L=2
 
 constexpr char fis_solutiiMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_MHL";
@@ -89,6 +91,7 @@ void alglib_function_neighbours(void);
 int TemperaturiExchange(void);
 int Temperaturi(void);
 double Suprafata(bool save);
+double Finvers(double x);
 int Funct_Dopri(double time, double *input, double *deriv);
 int Dopri5(double x, double xend, double eps, double hmax, double has, double *sol);
 
@@ -546,7 +549,7 @@ int main()
 
 	for (i = 0; i < n_part; i++)
 	{
-		if (rand_dis(gen) < 0.50)
+		if ( (0.05*Medium[i].x/depth) < (Finvers(rand_dis(gen)) - 0.25*0.05) )
 		{
 			T[i] = T_EXCITATION;
 			Medium[i].raza = rmare;
@@ -578,8 +581,6 @@ int main()
 
 	while ((contor_pasi < N_MAX_STEPS))
 	{
-		contor_pasi++;
-
 		Dopri5(timp, timp + step_t, eps, step_t, step_t / 4.0, &sol[0]);
 
 		for (int i = 0; i < n_part; i++)
@@ -713,7 +714,6 @@ int main()
 
 #endif
 
-
 			printf("Timp %5.2lf \t Temp %5.2lf \t HS %d \t Surf  %6.4lf \n", timp, T[0], n_H, arie);
 		}
 
@@ -721,6 +721,7 @@ int main()
 		fprintf(fvol, "%lf   %lf   %lf   %lf\n", timp, T[0], (double)n_H / n_part, arie);
 		// ************************ END SALVARI *****************************
 
+		contor_pasi++;
 	}
 	fclose(fvol);
 
@@ -743,6 +744,8 @@ int initializare(void)
 	for (i = 0; i < n_part; i++)
 	{
 		fscanf(fp, "%lG %lG %lG %lG %lG %lG \n", &Medium[i].x, &Medium[i].z, &Medium[i].y, &Medium[i].raza, &Medium[i].theta, &Medium[i].k);
+		if (Medium[i].x > depth)
+			depth = Medium[i].x;
 	}
 	fclose(fp);
 
@@ -1011,6 +1014,13 @@ double Suprafata(bool save)
 	}
 
 	return Surf;
+}
+
+//**************************************************************************
+
+double Finvers(double x)
+{
+	return( log(1.0 + (x * 2.0 / depth) * 6.3890560989306502272) / 2.6230812603996638992); //log(1.0 + x * (exp(depth) - 1.0)) scalat la depth = 3.0;
 }
 
 //**************************************************************************
