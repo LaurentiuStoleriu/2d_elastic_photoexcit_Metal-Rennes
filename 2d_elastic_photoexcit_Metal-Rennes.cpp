@@ -80,7 +80,8 @@ constexpr char fis_solutiiMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\e
 constexpr char fis_volumeMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_MHL.dat";
 constexpr char fis_volumePHOTO[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_PHOTO0.5_TExcit500_Exo00.dat";
 
-char file[200] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_PHOTOViz";
+char file[200]      = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_PHOTOViz";
+char fileHisto[200] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_PHOTOHisto";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -92,6 +93,7 @@ int TemperaturiExchange(void);
 int Temperaturi(void);
 double Suprafata(bool save);
 double Finvers(double x);
+void doTheHisto(int step);
 int Funct_Dopri(double time, double *input, double *deriv);
 int Dopri5(double x, double xend, double eps, double hmax, double has, double *sol);
 
@@ -713,7 +715,7 @@ int main()
 			}
 
 #endif
-
+			doTheHisto((int)timp);
 			printf("Timp %5.2lf \t Temp %5.2lf \t HS %d \t Surf  %6.4lf \n", timp, T[0], n_H, arie);
 		}
 
@@ -1021,6 +1023,39 @@ double Suprafata(bool save)
 double Finvers(double x)
 {
 	return( log(1.0 + (x * 2.0 / depth) * 6.3890560989306502272) / 2.6230812603996638992); //log(1.0 + x * (exp(depth) - 1.0)) scalat la depth = 3.0;
+}
+
+//**************************************************************************
+
+void doTheHisto(int step)
+{
+	int binSize = 2, indexBin;
+	int numBins = (int)(depth / binSize) + 1;
+
+	vector<double> histo(numBins, 0.0);
+	vector<int> countBins(numBins, 0);
+
+	char fis_save_histo[500];
+	sprintf(fis_save_histo, "%s_%d.dat", fileHisto, step);
+
+	FILE *fpout;
+	fpout = fopen(fis_save_histo, "w");
+
+	for (int i=0; i < n_part; i++)
+	{
+		indexBin = (int)(fabs(Medium[i].x) / binSize);
+		histo[indexBin] += T[i];
+		countBins[indexBin]++;
+	}
+
+	for (int i=0; i<numBins; i++)
+	{
+		if (countBins[i])
+			histo[i] /= countBins[i];
+		fprintf(fpout, "%d  %lf\n", i * binSize, histo[i]);
+	}
+
+	fclose(fpout);
 }
 
 //**************************************************************************
