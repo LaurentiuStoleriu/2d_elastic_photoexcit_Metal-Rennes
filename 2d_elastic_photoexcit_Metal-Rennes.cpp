@@ -43,7 +43,7 @@ constexpr auto n_steps = 301;
 constexpr auto T_LIM_DWN = 100.0;
 constexpr auto T_LIM_UP = 350.0;
 constexpr auto delta_T = (T_LIM_UP - T_LIM_DWN) / (n_steps - 1);
-constexpr auto T_EXCITATION = 500.0;
+constexpr auto T_EXCITATION = 400.0;
 constexpr auto N_MAX_STEPS = 100000;
 
 constexpr auto H = 1100.0;		//1100;
@@ -52,7 +52,7 @@ constexpr auto E = 400.0;		//200;
 constexpr auto ka = 2000.0;		//700;
 constexpr auto tau = 100.0;		//50;
 
-constexpr auto CoefTerm = 0.01; //% din diferenta de temperaturi ce se schimba per pas
+constexpr auto CoefTerm = 0.05; //% din diferenta de temperaturi ce se schimba per pas
 constexpr auto CoefTermExt = 0.01;
 
 typedef struct
@@ -619,7 +619,7 @@ int main()
 
 		arie = Suprafata(false);
 
-		if (((contor_pasi <= 1000) && !(contor_pasi % 25)) || ((contor_pasi > 1000) && !(contor_pasi % 100)))
+		if (((contor_pasi <= 1000) && !(contor_pasi % 100)) || ((contor_pasi > 1000) && !(contor_pasi % 100)))
 		{
 #ifdef grafic
 			{
@@ -879,7 +879,7 @@ int TemperaturiExchange(void)
 // 		{
 			if (neighbours[i] < 5)
 			{
-				T[i] -= (T[i] - T_LIM_DWN) * CoefTermExt;
+				T[i] -= (T[i] - T_LIM_DWN) * (5-neighbours[i])*CoefTermExt;
 				//T[i] = T_LIM_DWN;
 			}
 			else
