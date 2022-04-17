@@ -43,7 +43,7 @@ constexpr auto n_steps = 301;
 constexpr auto T_LIM_DWN = 100.0;
 constexpr auto T_LIM_UP = 350.0;
 constexpr auto delta_T = (T_LIM_UP - T_LIM_DWN) / (n_steps - 1);
-constexpr auto T_EXCITATION = 400.0;
+constexpr auto T_EXCITATION = 900.0;
 constexpr auto N_MAX_STEPS = 100000;
 
 constexpr auto H = 1100.0;		//1100;
@@ -52,8 +52,8 @@ constexpr auto E = 400.0;		//200;
 constexpr auto ka = 2000.0;		//700;
 constexpr auto tau = 100.0;		//50;
 
-constexpr auto CoefTerm = 0.05; //% din diferenta de temperaturi ce se schimba per pas
-constexpr auto CoefTermExt = 0.01;
+constexpr auto CoefTerm = 0.05;     //% din diferenta de temperaturi ce se schimba per pas
+constexpr auto CoefTermExt = 0.001;
 
 typedef struct
 {
@@ -551,7 +551,9 @@ int main()
 
 	for (i = 0; i < n_part; i++)
 	{
-		if ( (0.05*Medium[i].x/depth) < (Finvers(rand_dis(gen)) - 0.25*0.05) )
+		double value_to_check = Finvers(rand_dis(gen));
+		if ( /*(0.05*Medium[i].x/depth) < (Finvers(rand_dis(gen)) - 0.25*0.05)*/ 
+			   Medium[i].x / depth < value_to_check )
 		{
 			T[i] = T_EXCITATION;
 			Medium[i].raza = rmare;
@@ -600,11 +602,11 @@ int main()
 			if ((Medium[i].raza > 1.05 * radius) && (T[i] <= T_LIM_UP) && (probabilitateHL[i] > rand_dis(gen)))
 			{
 				Medium[i].raza = rmic;
-				//T[i] += 10.0;			// exotermic la H-to-L
-				for (int j = 0; j < neighbours[i]; j++)
-				{
-					T[Position_Coef[i][j].vecin] += 10.0;
-				}
+// 				T[i] += 10.0;			// exotermic la H-to-L
+// 				for (int j = 0; j < neighbours[i]; j++)
+// 				{
+// 					T[Position_Coef[i][j].vecin] += 10.0;
+// 				}
 				n_H--; n_L++;
 			}
 			else
@@ -961,7 +963,6 @@ double Suprafata(bool save)
 		}
 	}
 
-	//imsl_d_sort((6 * n_lat - 6), pante_inainte_ordonare, IMSL_PERMUTATION_USER, indecsi_sort, IMSL_RETURN_USER, pante_dupa_ordonare, 0);
 	gsl_sort2(pante_inainte_ordonare, 1, index_sort, 1, (6 * n_lat - 3));
 
 	for (i = 0; i < contor - 1; i++)
@@ -989,7 +990,7 @@ double Suprafata(bool save)
 	if (save)
 	{
 		FILE *fp;
-		fp = fopen("E:\\Stoleriu\\C\\special\\3d\\res\\2021\\Elastic\\run1.dat", "w");
+		fp = fopen("E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\run1.dat", "w");
 		for (i = 0; i < contor - 1; i++)
 		{
 			x1 = Medium[(long)index_margini[(long)index_sort[i]]].x;
@@ -1022,7 +1023,9 @@ double Suprafata(bool save)
 
 double Finvers(double x)
 {
-	return( log(1.0 + (x * 2.0 / depth) * 6.3890560989306502272) / 2.6230812603996638992); //log(1.0 + x * (exp(depth) - 1.0)) scalat la depth = 3.0;
+	//return(log(1.0 + x * (exp(depth) - 1.0)));//log(1.0 + x * (exp(depth) - 1.0)) scalat la depth = 3.0;
+	//return( log(1.0 + (x * 2.0 / depth) * 6.3890560989306502272) / 2.6230812603996638992); 
+	return(-log(x) / 10.0);
 }
 
 //**************************************************************************
