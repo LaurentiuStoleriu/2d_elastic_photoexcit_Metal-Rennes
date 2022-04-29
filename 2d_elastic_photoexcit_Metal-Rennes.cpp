@@ -16,7 +16,7 @@ using namespace alglib;
 using namespace std;
 
 #define grafic 1
-//#undef grafic
+#undef grafic
 
 #define MHL 1
 #undef MHL
@@ -40,7 +40,7 @@ constexpr auto Kf_poly = 1.0;
 constexpr auto mu = 0.04;
 
 constexpr auto n_steps = 301;
-constexpr auto T_LIM_DWN = 100.0;
+constexpr auto T_LIM_DWN = 200.0;
 constexpr auto T_LIM_UP = 350.0;
 constexpr auto delta_T = (T_LIM_UP - T_LIM_DWN) / (n_steps - 1);
 constexpr auto T_EXCITATION = 900.0;
@@ -78,7 +78,7 @@ constexpr char fis_particule[500] = "E:\\Stoleriu\\C\\special\\3d\\generare\\202
 
 constexpr char fis_solutiiMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_MHL";
 constexpr char fis_volumeMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_MHL.dat";
-constexpr char fis_volumePHOTO[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_PHOTO0.5_TExcit500_Exo00.dat";
+constexpr char fis_volumePHOTO[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_PHOTO1.0_TExcit900_Exo01_noprobabs.dat";
 
 char file[200]      = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_PHOTOViz";
 char fileHisto[200] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_PHOTOHisto";
@@ -549,21 +549,25 @@ int main()
 
 	timp = t_init;
 
-	for (i = 0; i < n_part; i++)
+	for (int fluency = 0; fluency < 4; fluency++)
 	{
-		double value_to_check = Finvers(rand_dis(gen));
-		if ( /*(0.05*Medium[i].x/depth) < (Finvers(rand_dis(gen)) - 0.25*0.05)*/ 
-			   Medium[i].x / depth < value_to_check )
+		for (i = 0; i < n_part; i++)
 		{
-			T[i] = T_EXCITATION;
-			Medium[i].raza = rmare;
-			n_H++; n_L--;
+			double value_to_check = Finvers(rand_dis(gen));
+			if ( Medium[i].raza > 1.001*rmic)
+				continue;
+			if ( Medium[i].x / depth < value_to_check) 
+			{
+				T[i] = T_EXCITATION;
+				Medium[i].raza = rmare;
+				n_H++; n_L--;
+			}
+			else
+			{
+				T[i] = T_LIM_DWN;
+				Medium[i].raza = rmic;
+			}
 		}
-		else
-		{
-			T[i] = T_LIM_DWN;
-			Medium[i].raza = rmic;
-	 	}
 	}
 
 	for (i = 0; i < n_part; i++) //Conditii initiale
@@ -599,14 +603,14 @@ int main()
 
 		for (int i = 0; i < n_part; i++)
 		{
-			if ((Medium[i].raza > 1.05 * radius) && (T[i] <= T_LIM_UP) && (probabilitateHL[i] > rand_dis(gen)))
+			if ((Medium[i].raza > 1.05 * radius) && (T[i] <= T_LIM_UP) /*&& (probabilitateHL[i] > rand_dis(gen))*/)
 			{
 				Medium[i].raza = rmic;
-// 				T[i] += 10.0;			// exotermic la H-to-L
-// 				for (int j = 0; j < neighbours[i]; j++)
-// 				{
-// 					T[Position_Coef[i][j].vecin] += 10.0;
-// 				}
+				//T[i] += 1.0;			// exotermic la H-to-L
+				for (int j = 0; j < neighbours[i]; j++)
+				{
+					T[Position_Coef[i][j].vecin] += 1.0;
+				}
 				n_H--; n_L++;
 			}
 			else
@@ -717,7 +721,7 @@ int main()
 			}
 
 #endif
-			doTheHisto((int)timp);
+			//doTheHisto((int)timp);
 			printf("Timp %5.2lf \t Temp %5.2lf \t HS %d \t Surf  %6.4lf \n", timp, T[0], n_H, arie);
 		}
 
@@ -881,7 +885,7 @@ int TemperaturiExchange(void)
 // 		{
 			if (neighbours[i] < 5)
 			{
-				T[i] -= (T[i] - T_LIM_DWN) * (5-neighbours[i])*CoefTermExt;
+				T[i] -= (T[i] - T_LIM_DWN) * (5 - neighbours[i]) * CoefTermExt;
 				//T[i] = T_LIM_DWN;
 			}
 			else
