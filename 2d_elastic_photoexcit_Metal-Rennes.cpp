@@ -16,7 +16,7 @@ using namespace alglib;
 using namespace std;
 
 #define grafic 1
-#undef grafic
+//#undef grafic
 
 #define MHL 1
 #undef MHL
@@ -53,7 +53,7 @@ constexpr auto ka = 2000.0;		//700;
 constexpr auto tau = 100.0;		//50;
 
 constexpr auto CoefTerm = 0.05;     //% din diferenta de temperaturi ce se schimba per pas
-constexpr auto CoefTermExt = 0.001;
+constexpr auto CoefTermExt = 0.004;
 
 typedef struct
 {
@@ -78,7 +78,7 @@ constexpr char fis_particule[500] = "E:\\Stoleriu\\C\\special\\3d\\generare\\202
 
 constexpr char fis_solutiiMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_MHL";
 constexpr char fis_volumeMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_MHL.dat";
-constexpr char fis_volumePHOTO[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_PHOTO1.0_TExcit900_Exo01_noprobabs.dat";
+constexpr char fis_volumePHOTO[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_PHOTO1.0_TExcit900_Exo01_TLimDwn200_CoefTermExt004.dat";
 
 char file[200]      = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_PHOTOViz";
 char fileHisto[200] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_PHOTOHisto";
