@@ -16,7 +16,10 @@ using namespace alglib;
 using namespace std;
 
 #define grafic 1
-//#undef grafic
+#undef grafic
+
+#define ThermalHisto 1
+#undef ThermalHisto
 
 #define MHL 1
 #undef MHL
@@ -44,7 +47,7 @@ constexpr auto T_LIM_DWN = 200.0;
 constexpr auto T_LIM_UP = 350.0;
 constexpr auto delta_T = (T_LIM_UP - T_LIM_DWN) / (n_steps - 1);
 constexpr auto T_EXCITATION = 900.0;
-constexpr auto N_MAX_STEPS = 100000;
+constexpr auto N_MAX_STEPS = 1000000;
 
 constexpr auto H = 1100.0;		//1100;
 constexpr auto S = 5.5;			//7;
@@ -53,7 +56,7 @@ constexpr auto ka = 2000.0;		//700;
 constexpr auto tau = 100.0;		//50;
 
 constexpr auto CoefTerm = 0.05;     //% din diferenta de temperaturi ce se schimba per pas
-constexpr auto CoefTermExt = 0.004;
+constexpr auto CoefTermExt = 0.01;
 
 typedef struct
 {
@@ -78,7 +81,7 @@ constexpr char fis_particule[500] = "E:\\Stoleriu\\C\\special\\3d\\generare\\202
 
 constexpr char fis_solutiiMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_Sol_MHL";
 constexpr char fis_volumeMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_Sol_MHL.dat";
-constexpr char fis_volumePHOTO[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_Sol_PHOTO4.0_TExcit900_Exo01_TLimDwn200_CoefTermExt004.dat";
+constexpr char fis_volumePHOTO[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_Sol_PHOTO1.0_TExcit900_Exo01_TLimDwn200_CoefTermExt01.dat";
 
 char file[200]      = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_PHOTOViz";
 char fileHisto[200] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_PHOTOHisto";
@@ -549,14 +552,15 @@ int main()
 
 	timp = t_init;
 
-	for (int fluency = 0; fluency < 1; fluency++)
+	for (int fluency = 0; fluency < 2; fluency++)
 	{
 		for (i = 0; i < n_part; i++)
 		{
-			double value_to_check = Finvers(rand_dis(gen) + 0.01) + 0.1; // -log(x+0.01)/10 + 0.01 -> probabs in (0.47..0.01) pentru x in (0 .. 1)
+			//double value_to_check = Finvers(rand_dis(gen) + 0.01) + 0.1; // -log(x+0.01)/10 + 0.01 -> probabs in (0.47..0.01) pentru x in (0 .. 1)
+			double value_to_check = Finvers((Medium[i].x / depth) + 0.01) + 0.01;
 			if ( Medium[i].raza > 1.001*rmic)
 				continue;
-			if ( Medium[i].x / depth < value_to_check) 
+			if ( value_to_check > rand_dis(gen)/*Medium[i].x / depth < value_to_check*/)
 			{
 				T[i] = T_EXCITATION;
 				Medium[i].raza = rmare;
@@ -721,14 +725,19 @@ int main()
 			}
 
 #endif
+#ifdef ThermalHisto
 			doTheHisto((int)timp);
+#endif
 			printf("Timp %5.2lf \t Temp %5.2lf \t HS %d \t Surf  %6.4lf \n", timp, T[0], n_H, arie);
 		}
 
 		// ************************* SALVARI VOL********************************
 		fprintf(fvol, "%lf   %lf   %lf   %lf\n", timp, T[0], (double)n_H / n_part, arie);
 		// ************************ END SALVARI *****************************
-
+		if (n_H == 0)
+		{
+			break;
+		}
 		contor_pasi++;
 	}
 	fclose(fvol);
@@ -1029,7 +1038,7 @@ double Finvers(double x)
 {
 	//return(log(1.0 + x * (exp(depth) - 1.0)));//log(1.0 + x * (exp(depth) - 1.0)) scalat la depth = 3.0;
 	//return( log(1.0 + (x * 2.0 / depth) * 6.3890560989306502272) / 2.6230812603996638992); 
-	return(-log(x) / 50.0);
+	return(-log(x) / 10.0);
 }
 
 //**************************************************************************
