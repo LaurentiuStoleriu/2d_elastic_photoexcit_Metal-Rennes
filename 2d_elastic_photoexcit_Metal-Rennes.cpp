@@ -24,9 +24,9 @@ using namespace std;
 #define PHOTO
 //#undef PHOTO
 
-constexpr auto n_lat = 50;
-constexpr auto n_part = 9900;
-constexpr auto n_equ = 39600;
+constexpr auto n_lat = 100; //50
+constexpr auto n_part = 39800; //9900
+constexpr auto n_equ = 159200; //39600
 constexpr auto n_max_vec = 6;
 
 constexpr auto radius = 0.2;	// radius trebuie sa ramana 1, e doar ce e la LS
@@ -74,14 +74,14 @@ double probabilitateHL[n_part], probabilitateLH[n_part], pres[n_part];
 
 double depth = 0.0;
 
-constexpr char fis_particule[500] = "E:\\Stoleriu\\C\\special\\3d\\generare\\2022\\Elastic\\50x50_RektHex_L06_LS.dat"; // HS: r=1.1 L=2
+constexpr char fis_particule[500] = "E:\\Stoleriu\\C\\special\\3d\\generare\\2022\\Elastic\\100x100_RektHex_L06_LS.dat"; // HS: r=1.1 L=2
 
-constexpr char fis_solutiiMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_MHL";
-constexpr char fis_volumeMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_MHL.dat";
-constexpr char fis_volumePHOTO[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_Sol_PHOTO1.0_TExcit900_Exo01_TLimDwn200_CoefTermExt004.dat";
+constexpr char fis_solutiiMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_Sol_MHL";
+constexpr char fis_volumeMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_Sol_MHL.dat";
+constexpr char fis_volumePHOTO[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_Sol_PHOTO4.0_TExcit900_Exo01_TLimDwn200_CoefTermExt004.dat";
 
-char file[200]      = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_PHOTOViz";
-char fileHisto[200] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\50x50_RektHex_PHOTOHisto";
+char file[200]      = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_PHOTOViz";
+char fileHisto[200] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_PHOTOHisto";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -144,29 +144,29 @@ int main()
 		diference = radius;
 		j = 0;
 
-		while (((diference) > 1.0e-3) || (j < 10))
-		{
-			j++;
-
-			for (i = 0; i < n_part; i++)
-			{
-				sol_old[4 * i + 0] = sol[4 * i + 0];
-				sol_old[4 * i + 2] = sol[4 * i + 2];
-			}
-
-			Dopri5(timp, timp + step_t, eps, step_t, step_t / 4.0, &sol[0]);
-
-			diference = fabs(sol[0] - sol_old[0]);
-			for (i = 0; i < n_part; i++)
-			{
-				Medium[i].x = sol[4 * i + 0];
-				Medium[i].y = sol[4 * i + 2];
-				if (fabs(sol[4 * i + 0] - sol_old[4 * i + 0]) > diference) diference = fabs(sol[4 * i + 0] - sol_old[4 * i + 0]);
-				if (fabs(sol[4 * i + 2] - sol_old[4 * i + 2]) > diference) diference = fabs(sol[4 * i + 2] - sol_old[4 * i + 2]);
-			}
-			timp += step_t;
-			printf("S  T  E  P :   %d , \t\t diference: %7.5lg \t\t in: %7.3lf ms\n", j, diference, 0.0);
-		}
+// 		while (((diference) > 1.0e-3) || (j < 10))
+// 		{
+// 			j++;
+// 
+// 			for (i = 0; i < n_part; i++)
+// 			{
+// 				sol_old[4 * i + 0] = sol[4 * i + 0];
+// 				sol_old[4 * i + 2] = sol[4 * i + 2];
+// 			}
+// 
+// 			Dopri5(timp, timp + step_t, eps, step_t, step_t / 4.0, &sol[0]);
+// 
+// 			diference = fabs(sol[0] - sol_old[0]);
+// 			for (i = 0; i < n_part; i++)
+// 			{
+// 				Medium[i].x = sol[4 * i + 0];
+// 				Medium[i].y = sol[4 * i + 2];
+// 				if (fabs(sol[4 * i + 0] - sol_old[4 * i + 0]) > diference) diference = fabs(sol[4 * i + 0] - sol_old[4 * i + 0]);
+// 				if (fabs(sol[4 * i + 2] - sol_old[4 * i + 2]) > diference) diference = fabs(sol[4 * i + 2] - sol_old[4 * i + 2]);
+// 			}
+// 			timp += step_t;
+// 			printf("S  T  E  P :   %d , \t\t diference: %7.5lg \t\t in: %7.3lf ms\n", j, diference, 0.0);
+// 		}
 
 		arie_ini = Suprafata(false);
 	}
@@ -549,11 +549,11 @@ int main()
 
 	timp = t_init;
 
-	for (int fluency = 0; fluency < 4; fluency++)
+	for (int fluency = 0; fluency < 1; fluency++)
 	{
 		for (i = 0; i < n_part; i++)
 		{
-			double value_to_check = Finvers(rand_dis(gen));
+			double value_to_check = Finvers(rand_dis(gen) + 0.01) + 0.1; // -log(x+0.01)/10 + 0.01 -> probabs in (0.47..0.01) pentru x in (0 .. 1)
 			if ( Medium[i].raza > 1.001*rmic)
 				continue;
 			if ( Medium[i].x / depth < value_to_check) 
@@ -589,13 +589,13 @@ int main()
 
 	while ((contor_pasi < N_MAX_STEPS))
 	{
-		Dopri5(timp, timp + step_t, eps, step_t, step_t / 4.0, &sol[0]);
-
-		for (int i = 0; i < n_part; i++)
-		{
-			Medium[i].x = sol[4 * i + 0];
-			Medium[i].y = sol[4 * i + 2];
-		}
+// 		Dopri5(timp, timp + step_t, eps, step_t, step_t / 4.0, &sol[0]);
+// 
+// 		for (int i = 0; i < n_part; i++)
+// 		{
+// 			Medium[i].x = sol[4 * i + 0];
+// 			Medium[i].y = sol[4 * i + 2];
+// 		}
 		timp += step_t;
 
 		TemperaturiExchange();
@@ -625,7 +625,7 @@ int main()
 
 		arie = Suprafata(false);
 
-		if (((contor_pasi <= 1000) && !(contor_pasi % 100)) || ((contor_pasi > 1000) && !(contor_pasi % 100)))
+		if (((contor_pasi <= 1000) && !(contor_pasi % 100)) || ((contor_pasi > 1000) && !(contor_pasi % 1000)))
 		{
 #ifdef grafic
 			{
@@ -721,7 +721,7 @@ int main()
 			}
 
 #endif
-			//doTheHisto((int)timp);
+			doTheHisto((int)timp);
 			printf("Timp %5.2lf \t Temp %5.2lf \t HS %d \t Surf  %6.4lf \n", timp, T[0], n_H, arie);
 		}
 
@@ -1029,7 +1029,7 @@ double Finvers(double x)
 {
 	//return(log(1.0 + x * (exp(depth) - 1.0)));//log(1.0 + x * (exp(depth) - 1.0)) scalat la depth = 3.0;
 	//return( log(1.0 + (x * 2.0 / depth) * 6.3890560989306502272) / 2.6230812603996638992); 
-	return(-log(x) / 10.0);
+	return(-log(x) / 50.0);
 }
 
 //**************************************************************************
