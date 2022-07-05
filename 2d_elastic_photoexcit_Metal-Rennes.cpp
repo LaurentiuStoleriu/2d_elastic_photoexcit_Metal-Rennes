@@ -16,10 +16,10 @@ using namespace alglib;
 using namespace std;
 
 #define grafic 1
-#undef grafic
+//#undef grafic
 
 #define ThermalHisto 1
-#undef ThermalHisto
+//#undef ThermalHisto
 
 #define MHL 1
 #undef MHL
@@ -55,7 +55,8 @@ constexpr auto E = 400.0;		//200;
 constexpr auto ka = 2000.0;		//700;
 constexpr auto tau = 100.0;		//50;
 
-constexpr auto CoefTerm = 0.05;     //% din diferenta de temperaturi ce se schimba per pas
+constexpr auto CoefExoTerm = 1.0;	// deg. crestere temp a fiecari vecin
+constexpr auto CoefTerm = 0.5;     //% din diferenta de temperaturi ce se schimba per pas
 constexpr auto CoefTermExt = 0.01;
 
 typedef struct
@@ -73,18 +74,19 @@ sPosCoef Position_Coef[n_part][n_max_vec];
 int   neighbours[n_part];
 double sol[n_equ], sol_old[n_equ];
 double T[n_part];
+double T_beg[n_part];
 double probabilitateHL[n_part], probabilitateLH[n_part], pres[n_part];
 
 double depth = 0.0;
 
-constexpr char fis_particule[500] = "E:\\Stoleriu\\C\\special\\3d\\generare\\2022\\Elastic\\100x100_RektHex_L06_LS.dat"; // HS: r=1.1 L=2
+constexpr char fis_particule[500] = "D:\\Stoleriu\\C\\special\\3d\\generare\\2022\\Elastic\\100x100_RektHex_L06_LS.dat"; // HS: r=1.1 L=2
 
-constexpr char fis_solutiiMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_Sol_MHL";
-constexpr char fis_volumeMHL[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_Sol_MHL.dat";
-constexpr char fis_volumePHOTO[500] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_Sol_PHOTO1.0_TExcit900_Exo01_TLimDwn200_CoefTermExt01.dat";
+constexpr char fis_solutiiMHL[500] = "D:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_Sol_MHL";
+constexpr char fis_volumeMHL[500] = "D:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_Sol_MHL.dat";
+constexpr char fis_volumePHOTO[500] = "D:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_Sol_PHOTO1.0_TExcit900_Exo1_TLimDwn200_CoefTermExt01.dat";
 
-char file[200]      = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_PHOTOViz";
-char fileHisto[200] = "E:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_PHOTOHisto";
+char file[200]      = "D:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_PHOTOViz";
+char fileHisto[200] = "D:\\Stoleriu\\C\\special\\3d\\res\\2022\\elastic\\TiOX\\100x100_RektHex_PHOTOHisto";
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -552,6 +554,8 @@ int main()
 
 	timp = t_init;
 
+	// TODO - paraview + hysto pentru diferite fluencies
+
 	for (int fluency = 0; fluency < 2; fluency++)
 	{
 		for (i = 0; i < n_part; i++)
@@ -591,6 +595,10 @@ int main()
 	double d1;
 #endif
 
+// 	int wait[n_part];
+// 	for (int i = 0; i < n_part; i++)
+// 		wait[i] = 0;
+
 	while ((contor_pasi < N_MAX_STEPS))
 	{
 // 		Dopri5(timp, timp + step_t, eps, step_t, step_t / 4.0, &sol[0]);
@@ -603,28 +611,34 @@ int main()
 		timp += step_t;
 
 		TemperaturiExchange();
-		Temperaturi();
+		//Temperaturi();
+
+		for (int i = 0; i < n_part; i++)
+			T_beg[i] = T[i];
 
 		for (int i = 0; i < n_part; i++)
 		{
-			if ((Medium[i].raza > 1.05 * radius) && (T[i] <= T_LIM_UP) /*&& (probabilitateHL[i] > rand_dis(gen))*/)
+			if ((Medium[i].raza > 1.05 * radius) && (T_beg[i] <= T_LIM_UP) /*&& (probabilitateHL[i] > rand_dis(gen))*/)		//neconditionat
 			{
+				//wait[i] = 5;
 				Medium[i].raza = rmic;
-				//T[i] += 1.0;			// exotermic la H-to-L
+				//T[i] += CoefExoTerm * 6.0;			// exotermic la H-to-L
 				for (int j = 0; j < neighbours[i]; j++)
 				{
-					T[Position_Coef[i][j].vecin] += 1.0;
+					T[Position_Coef[i][j].vecin] += CoefExoTerm * 1.0;
 				}
 				n_H--; n_L++;
 			}
 			else
 			{
-				if ((Medium[i].raza < 1.05 * radius) && (T[i] >= T_LIM_UP) /*(probabilitateLH[i] > rand_dis(gen))*/)		//neconditionat
+				if ((Medium[i].raza < 1.05 * radius) && (T_beg[i] >= T_LIM_UP) /*&& (!wait[i])*/ /*(probabilitateLH[i] > rand_dis(gen))*/)		//neconditionat
 				{
 					Medium[i].raza = rmare;
 					n_H++; n_L--;
 				}
 			}
+// 			if (wait[i] > 0)
+// 				wait[i]--;
 		}
 
 		arie = Suprafata(false);
